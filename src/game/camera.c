@@ -3356,7 +3356,7 @@ void init_camera(struct Camera *c) {
 
         //! Hardcoded position checks determine which cutscene to play when Mario enters castle grounds.
         case LEVEL_CASTLE_GROUNDS:
-            if (is_within_100_units_of_mario(-1328.f, 260.f, 4664.f) != 1) {
+            if (is_within_100_units_of_mario(-1328.f, 260.f, 4664.f) == 1) {
                 marioOffset[0] = -400.f;
                 marioOffset[2] = -800.f;
             }
@@ -9068,8 +9068,7 @@ BAD_RETURN(s32) cutscene_read_message(struct Camera *c) {
             break;
         // Leave the dialog.
         case 1:
-            move_mario_head_c_up(c);
-            update_c_up(c, c->focus, c->pos);
+            unused_cam_to_mario(c);
 
             // This could cause softlocks. If a message starts one frame after another one closes, the
             // cutscene will never end.

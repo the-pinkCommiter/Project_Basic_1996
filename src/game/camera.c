@@ -9068,8 +9068,7 @@ BAD_RETURN(s32) cutscene_read_message(struct Camera *c) {
             break;
         // Leave the dialog.
         case 1:
-            move_mario_head_c_up(c);
-            update_c_up(c, c->focus, c->pos);
+            unused_cam_to_mario(c);
 
             // This could cause softlocks. If a message starts one frame after another one closes, the
             // cutscene will never end.

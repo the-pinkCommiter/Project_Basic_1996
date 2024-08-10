@@ -79,6 +79,39 @@ s32 mario_update_punch_sequence(struct MarioState *m) {
             play_sound(SOUND_ACTION_THROW, m->marioObj->header.gfx.cameraToObject);
             // Fall-through:
         case 4:
+            set_mario_animation(m, MARIO_ANIM_SECOND_PUNCH);
+            if (is_anim_past_end(m)) {
+                m->actionArg = 5;
+            } else {
+                m->actionArg = 4;
+            }
+
+            if (m->marioObj->header.gfx.animInfo.animFrame > 0) {
+                m->flags |= MARIO_PUNCHING;
+            }
+
+            if (m->actionArg == 5) {
+                m->marioBodyState->punchState = (1 << 6) | 4;
+            }
+            break;
+
+        case 5:
+            set_mario_animation(m, MARIO_ANIM_SECOND_PUNCH_FAST);
+            if (m->marioObj->header.gfx.animInfo.animFrame <= 0) {
+                m->flags |= MARIO_PUNCHING;
+            }
+
+            if (m->input & INPUT_B_PRESSED) {
+                m->actionArg = 6;
+            }
+
+            if (is_anim_at_end(m)) {
+                set_mario_action(m, endAction, 0);
+            }
+            break;
+
+        case 6:
+            play_mario_action_sound(m, SOUND_ACTION_SPIN, 1);
             animFrame = set_mario_animation(m, MARIO_ANIM_GROUND_KICK);
             if (animFrame == 0) {
                 m->marioBodyState->punchState = (2 << 6) | 6;
@@ -94,6 +127,7 @@ s32 mario_update_punch_sequence(struct MarioState *m) {
             break;
 
         case 9:
+            play_mario_action_sound(m, SOUND_ACTION_SPIN, 1);
             set_mario_animation(m, MARIO_ANIM_BREAKDANCE);
             animFrame = m->marioObj->header.gfx.animInfo.animFrame;
 

@@ -3356,7 +3356,7 @@ void init_camera(struct Camera *c) {
 
         //! Hardcoded position checks determine which cutscene to play when Mario enters castle grounds.
         case LEVEL_CASTLE_GROUNDS:
-            if (is_within_100_units_of_mario(-1328.f, 260.f, 4664.f) != 1) {
+            if (is_within_100_units_of_mario(-1328.f, 260.f, 4664.f) == 1) {
                 marioOffset[0] = -400.f;
                 marioOffset[2] = -800.f;
             }

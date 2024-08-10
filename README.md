@@ -189,6 +189,6 @@ discuss what you would like to change.
 
 Run `clang-format` on your code to ensure it meets the project's coding standards.
 
-Official Discord (N64 Decompilation Discord): [discord.gg/DuYH3Fh](https://discord.gg/DuYH3Fh)
+Official Discord (N64 Decompilation Discord): https://discord.gg/DuYH3Fh
 
-Official Project Discord: [discord.gg/MAPc68tD2Q] (https://discord.gg/MAPc68tD2Q)
+Official Project Discord: https://discord.gg/MAPc68tD2Q

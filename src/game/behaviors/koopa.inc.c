@@ -8,6 +8,10 @@
  */
 
 /**
+ * xerox made this :D
+ */
+
+/**
  * Hitbox for koopa - this is used for every form except Koopa the Quick, which
  * uses a hardcoded soft hitbox.
  */
@@ -51,8 +55,8 @@ static u8 sKoopaShelledAttackHandlers[] = {
  * Data to control the behavior of each instance of Koopa the Quick.
  */
 struct KoopaTheQuickProperties {
-    s16 initDialogID;
-    s16 winDialogID;
+    s16 initText;
+    s16 winText;
     Trajectory const *path;
     Vec3s starPos;
 };
@@ -139,6 +143,15 @@ static void koopa_walk_start(void) {
     }
 }
 
+static void big_koopa_walk_start(void) {
+    obj_forward_vel_approach(3.0f * 1.0f, 0.3f * 1.0f);
+
+    if (cur_obj_init_anim_and_check_if_end(11)) {
+        o->oSubAction++;
+        o->oKoopaCountdown = random_linear_offset(30, 100);
+    }
+}
+
 /**
  * Walk until oKoopaCountdown hits zero, then increment sub-action.
  */
@@ -158,6 +171,13 @@ static void koopa_walk(void) {
  */
 static void koopa_walk_stop(void) {
     obj_forward_vel_approach(0.0f, 1.0f * o->oKoopaAgility);
+    if (cur_obj_init_anim_and_check_if_end(10)) {
+        o->oAction = KOOPA_SHELLED_ACT_STOPPED;
+    }
+}
+
+static void big_koopa_walk_stop(void) {
+    obj_forward_vel_approach(0.0f, 1.0f * 1.0f);
     if (cur_obj_init_anim_and_check_if_end(10)) {
         o->oAction = KOOPA_SHELLED_ACT_STOPPED;
     }
@@ -193,6 +213,32 @@ static void koopa_shelled_act_walk(void) {
     }
 
     koopa_check_run_from_mario();
+}
+
+static void big_ass_koopa_act_walk(void) {
+    if (o->oKoopaTurningAwayFromWall) {
+        o->oKoopaTurningAwayFromWall = obj_resolve_collisions_and_turn(o->oKoopaTargetYaw, 0x200);
+    } else {
+        // If far from home, then begin turning toward home
+        if (o->oDistanceToMario >= 25000.0f) {
+            o->oKoopaTargetYaw = o->oAngleToMario;
+        }
+
+        o->oKoopaTurningAwayFromWall = obj_bounce_off_walls_edges_objects(&o->oKoopaTargetYaw);
+        cur_obj_rotate_yaw_toward(o->oKoopaTargetYaw, 0x200);
+    }
+
+    switch (o->oSubAction) {
+        case KOOPA_SHELLED_SUB_ACT_START_WALK:
+            big_koopa_walk_start();
+            break;
+        case KOOPA_SHELLED_SUB_ACT_WALK:
+            koopa_walk();
+            break;
+        case KOOPA_SHELLED_SUB_ACT_STOP_WALK:
+            big_koopa_walk_stop();
+            break;
+    }
 }
 
 /**
@@ -316,6 +362,21 @@ static void koopa_shelled_update(void) {
         if (o->oAction == KOOPA_SHELLED_ACT_DIE) {
             obj_die_if_health_non_positive();
         }
+    }
+
+    cur_obj_move_standard(-78);
+}
+
+static void big_koopa_update(void) {
+    cur_obj_update_floor_and_walls();
+    switch (o->oAction) {
+        case KOOPA_SHELLED_ACT_STOPPED:
+            koopa_shelled_act_stopped();
+            break;
+
+        case KOOPA_SHELLED_ACT_WALK:
+            big_ass_koopa_act_walk();
+            break;
     }
 
     cur_obj_move_standard(-78);
@@ -483,7 +544,7 @@ s32 obj_begin_race(s32 noTimer) {
         }
 
         // Unfreeze mario and disable time stop to begin the race
-        set_mario_npc_dialog(MARIO_DIALOG_STOP);
+        set_mario_npc_dialog(0);
         disable_time_stop_including_mario();
     } else if (o->oTimer > 50) {
         return TRUE;
@@ -496,8 +557,6 @@ s32 obj_begin_race(s32 noTimer) {
  * Wait for mario to approach, and then enter the show init text action.
  */
 static void koopa_the_quick_act_wait_before_race(void) {
-    koopa_shelled_act_stopped();
-
     if (o->oKoopaTheQuickInitTextboxCooldown != 0) {
         o->oKoopaTheQuickInitTextboxCooldown--;
     } else if (cur_obj_can_mario_activate_textbox_2(400.0f, 400.0f)) {
@@ -509,6 +568,8 @@ static void koopa_the_quick_act_wait_before_race(void) {
         o->oForwardVel = 0.0f;
         cur_obj_init_animation_with_sound(7);
     }
+
+    big_koopa_update();
 }
 
 /**
@@ -517,11 +578,9 @@ static void koopa_the_quick_act_wait_before_race(void) {
  */
 static void koopa_the_quick_act_show_init_text(void) {
     s32 response = obj_update_race_proposition_dialog(
-        sKoopaTheQuickProperties[o->oKoopaTheQuickRaceIndex].initDialogID);
+        sKoopaTheQuickProperties[o->oKoopaTheQuickRaceIndex].initText);
 
-    if (response == DIALOG_RESPONSE_YES) {
-        UNUSED u8 filler[4];
-
+    if (response == 1) {
         gMarioShotFromCannon = FALSE;
         o->oAction = KOOPA_THE_QUICK_ACT_RACE;
         o->oForwardVel = 0.0f;
@@ -532,7 +591,7 @@ static void koopa_the_quick_act_show_init_text(void) {
 
         o->oKoopaTurningAwayFromWall = FALSE;
         o->oFlags |= OBJ_FLAG_ACTIVE_FROM_AFAR;
-    } else if (response == DIALOG_RESPONSE_NO) {
+    } else if (response == 2) {
         o->oAction = KOOPA_THE_QUICK_ACT_WAIT_BEFORE_RACE;
         o->oKoopaTheQuickInitTextboxCooldown = 60;
     }
@@ -603,8 +662,8 @@ static void koopa_the_quick_act_race(void) {
             f32 downhillSteepness;
             s32 bowlingBallStatus;
 
-            downhillSteepness = 1.0f + sins((s16)(f32) o->oPathedTargetPitch);
-            cur_obj_rotate_yaw_toward(o->oPathedTargetYaw, (s32)(o->oKoopaAgility * 150.0f));
+            downhillSteepness = 1.0f + sins((s16) (f32) o->oPathedTargetPitch);
+            cur_obj_rotate_yaw_toward(o->oPathedTargetYaw, (s32) (o->oKoopaAgility * 150.0f));
 
             switch (o->oSubAction) {
                 case KOOPA_THE_QUICK_SUB_ACT_START_RUN:
@@ -721,7 +780,7 @@ static void koopa_the_quick_act_after_race(void) {
                 } else {
                     // Mario won
                     o->parentObj->oKoopaRaceEndpointDialog =
-                        sKoopaTheQuickProperties[o->oKoopaTheQuickRaceIndex].winDialogID;
+                        sKoopaTheQuickProperties[o->oKoopaTheQuickRaceIndex].winText;
                 }
             } else {
                 // KtQ won
@@ -731,10 +790,10 @@ static void koopa_the_quick_act_after_race(void) {
             o->oFlags &= ~OBJ_FLAG_ACTIVE_FROM_AFAR;
         }
     } else if (o->parentObj->oKoopaRaceEndpointDialog > 0) {
-        s32 dialogResponse = cur_obj_update_dialog_with_cutscene(MARIO_DIALOG_LOOK_UP,
-            DIALOG_FLAG_TURN_TO_MARIO, CUTSCENE_DIALOG, o->parentObj->oKoopaRaceEndpointDialog);
+        s32 dialogResponse = cur_obj_update_dialog_with_cutscene(
+            2, 1, CUTSCENE_DIALOG, o->parentObj->oKoopaRaceEndpointDialog);
         if (dialogResponse != 0) {
-            o->parentObj->oKoopaRaceEndpointDialog = DIALOG_NONE;
+            o->parentObj->oKoopaRaceEndpointDialog = -1;
             o->oTimer = 0;
         }
     } else if (o->parentObj->oKoopaRaceEndpointRaceStatus != 0) {

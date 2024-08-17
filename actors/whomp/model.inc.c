@@ -9,7 +9,7 @@
 #define LIGHT_X 40
 #define LIGHT_Y 40
 #define LIGHT_Z 40
-#define	SCALE	2
+#define	SCALE	4
 #define ShapeColor_wallman(R,G,B) {{R/SCALE ,G/SCALE ,B/SCALE ,0 ,R/SCALE ,G/SCALE ,B/SCALE ,0 },{ R, G, B, 0, R, G, B, 0, LIGHT_X, LIGHT_Y, LIGHT_Z, 0}}
 
 

@@ -25,4 +25,10 @@
 
 #define CMD_HHHHHH(a, b, c, d, e, f) CMD_HH(a, b), CMD_HH(c, d), CMD_HH(e, f)
 
+// maplang.h command marcos base
+#define	_msCmd(cmd,var,dat)						CMD_BBH(cmd, var, dat)
+#define	_msAdr(adr) 							CMD_PTR(adr)
+#define	_msPac(da1,da2)							CMD_HH(da1, da2)	
+#define	_msU32(dat)								((ulong)(dat*65536.0f))
+
 #endif // COMMAND_MACROS_BASE_H

@@ -1,4 +1,3 @@
-
 /**
  * Behavior for bhvChainChomp, bhvChainChompChainPart, bhvWoodenPost, and bhvChainChompGate.
  * bhvChainChomp spawns its bhvWoodenPost in its behavior script. It spawns 5 chain
@@ -8,7 +7,7 @@
  * Processing order is bhvWoodenPost, bhvChainChompGate, bhvChainChomp, bhvChainChompChainPart.
  * The chain parts are processed starting at the post and ending at the chomp.
  */
-
+#include "src/game/print.h"
 /**
  * Hitbox for chain chomp.
  */
@@ -164,51 +163,51 @@ static void chain_chomp_restore_normal_chain_lengths(void) {
 /**
  * Turn toward mario. Wait a bit and then enter the lunging sub-action.
  */
+
+// a coding mess created by xerox and AmitabhTechz
 static void chain_chomp_sub_act_turn(void) {
     o->oGravity = -4.0f;
-
+    // print_text_fmt_int(50, 50, "%d", o->oTimer);
     chain_chomp_restore_normal_chain_lengths();
     obj_move_pitch_approach(0, 0x100);
+    cur_obj_rotate_yaw_toward(o->oAngleToMario, 0x400);
+    if (abs_angle_diff(o->oAngleToMario, o->oMoveAngleYaw) < 0x50) {
+        if (o->oTimer >= 120) {
+            if (o->oMoveFlags & OBJ_MOVE_MASK_ON_GROUND) {
+                // Increase the maximum distance from the pivot and enter
+                // the lunging sub-action.
+                cur_obj_play_sound_2(SOUND_GENERAL_CHAIN_CHOMP2);
 
-    if (o->oMoveFlags & OBJ_MOVE_MASK_ON_GROUND) {
-        cur_obj_rotate_yaw_toward(o->oAngleToMario, 0x400);
-        if (abs_angle_diff(o->oAngleToMario, o->oMoveAngleYaw) < 0x800) {
-            if (o->oTimer > 30) {
-                if (cur_obj_check_anim_frame(0)) {
-                    cur_obj_reverse_animation();
-                    if (o->oTimer > 40) {
-                        // Increase the maximum distance from the pivot and enter
-                        // the lunging sub-action.
-                        cur_obj_play_sound_2(SOUND_GENERAL_CHAIN_CHOMP2);
+                o->oSubAction = CHAIN_CHOMP_SUB_ACT_LUNGE;
+                o->oChainChompMaxDistFromPivotPerChainPart = 900.0f / 5;
 
-                        o->oSubAction = CHAIN_CHOMP_SUB_ACT_LUNGE;
-                        o->oChainChompMaxDistFromPivotPerChainPart = 900.0f / 5;
-
-                        o->oForwardVel = 140.0f;
-                        o->oVelY = 20.0f;
-                        o->oGravity = 0.0f;
-                        o->oChainChompTargetPitch = obj_get_pitch_from_vel();
-                    }
-                } else {
-                    o->oTimer--;
-                }
+                o->oForwardVel = 140.0f;
+                o->oVelY = 20.0f;
+                o->oGravity = 0.0f;
+                o->oChainChompTargetPitch = obj_get_pitch_from_vel();
             } else {
-                o->oForwardVel = 0.0f;
+                o->oTimer = 135;
             }
         } else {
+            if (o->oMoveFlags & OBJ_MOVE_MASK_ON_GROUND) {
+                cur_obj_play_sound_2(SOUND_GENERAL_CHAIN_CHOMP1);
+                o->oForwardVel = 10.0f;
+                o->oVelY = 20.0f;
+            }
+        }
+    } else {
+        o->oTimer = 0;
+        if (o->oMoveFlags & OBJ_MOVE_MASK_ON_GROUND) {
             cur_obj_play_sound_2(SOUND_GENERAL_CHAIN_CHOMP1);
             o->oForwardVel = 10.0f;
             o->oVelY = 20.0f;
         }
-    } else {
-        cur_obj_rotate_yaw_toward(o->oAngleToMario, 400);
-        o->oTimer = 0;
     }
 }
 
 static void chain_chomp_sub_act_lunge(void) {
     obj_face_pitch_approach(o->oChainChompTargetPitch, 0x400);
-
+    o->oTimer = 110;
     if (o->oForwardVel != 0.0f) {
         f32 val04;
 
@@ -227,8 +226,8 @@ static void chain_chomp_sub_act_lunge(void) {
         o->oTimer = 0;
     } else {
         // Turn toward pivot
-        cur_obj_rotate_yaw_toward(atan2s(o->oChainChompSegments[0].posZ, o->oChainChompSegments[0].posX),
-                                  0x1000);
+        cur_obj_rotate_yaw_toward(
+            atan2s(o->oChainChompSegments[0].posZ, o->oChainChompSegments[0].posX), 0x1000);
 
         if (o->oChainChompUnk104 != 0.0f) {
             approach_f32_ptr(&o->oChainChompUnk104, 0.0f, 0.8f);
@@ -241,10 +240,6 @@ static void chain_chomp_sub_act_lunge(void) {
             o->oChainChompMaxDistBetweenChainParts = -o->oChainChompUnk104;
         }
     }
-
-    if (o->oTimer < 30) {
-        cur_obj_reverse_animation();
-    }
 }
 
 /**
@@ -256,8 +251,8 @@ static void chain_chomp_released_trigger_cutscene(void) {
 
     //! Can delay this if we get into a cutscene-unfriendly action after the
     //  last post ground pound and before this
-    if (set_mario_npc_dialog(MARIO_DIALOG_LOOK_UP) == MARIO_DIALOG_STATUS_SPEAK
-        && (o->oMoveFlags & OBJ_MOVE_MASK_ON_GROUND) && cutscene_object(CUTSCENE_STAR_SPAWN, o) == 1) {
+    if (set_mario_npc_dialog(2) == 2 && (o->oMoveFlags & OBJ_MOVE_MASK_ON_GROUND)
+        && cutscene_object(CUTSCENE_STAR_SPAWN, o) == 1) {
         o->oChainChompReleaseStatus = CHAIN_CHOMP_RELEASED_LUNGE_AROUND;
         o->oTimer = 0;
     }
@@ -342,7 +337,7 @@ static void chain_chomp_released_jump_away(void) {
  */
 static void chain_chomp_released_end_cutscene(void) {
     if (cutscene_object(CUTSCENE_STAR_SPAWN, o) == -1) {
-        set_mario_npc_dialog(MARIO_DIALOG_STOP);
+        set_mario_npc_dialog(0);
         o->oAction = CHAIN_CHOMP_ACT_UNLOAD_CHAIN;
     }
 }
@@ -510,7 +505,7 @@ void bhv_wooden_post_update(void) {
         } else {
             // When mario runs around the post 3 times within 200 frames, spawn
             // coins
-            o->oWoodenPostTotalMarioAngle += (s16)(o->oAngleToMario - o->oWoodenPostPrevAngleToMario);
+            o->oWoodenPostTotalMarioAngle += (s16) (o->oAngleToMario - o->oWoodenPostPrevAngleToMario);
             if (absi(o->oWoodenPostTotalMarioAngle) > 0x30000 && o->oTimer < 200) {
                 obj_spawn_loot_yellow_coins(o, 5, 20.0f);
                 set_object_respawn_info_bits(o, 1);
@@ -535,7 +530,7 @@ void bhv_chain_chomp_gate_update(void) {
     if (o->parentObj->oChainChompHitGate) {
         spawn_mist_particles_with_sound(SOUND_GENERAL_WALL_EXPLOSION);
         set_camera_shake_from_point(SHAKE_POS_SMALL, o->oPosX, o->oPosY, o->oPosZ);
-        spawn_mist_particles_variable(0, 127, 200.0f);
+        spawn_mist_particles_variable(0, 0x7F, 200.0f);
         spawn_triangle_break_particles(30, MODEL_DIRT_ANIMATION, 3.0f, 4);
         obj_mark_for_deletion(o);
     }

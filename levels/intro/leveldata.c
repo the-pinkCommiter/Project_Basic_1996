@@ -8711,18 +8711,9 @@ const Gfx intro_seg7_dl_copyright[] = {
     gsDPPipeSync(),
     gsDPSetCombineMode(G_CC_DECALFADE, G_CC_DECALFADE),
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
-#if defined(VERSION_CN)
-    gsDPLoadTextureBlock(intro_seg7_texture_copyright_ique, G_IM_FMT_RGBA, G_IM_SIZ_16b, 128, 16, 0, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 7, 4, G_TX_NOLOD, G_TX_NOLOD),
-    gsSPVertex(intro_seg7_vertex_copyright_ique, 4, 0),
-    gsSP1Triangle(0, 1, 2, 0),
-    gsSP1Triangle(0, 2, 3, 0),
-#endif
+
     gsDPLoadTextureBlock(intro_seg7_texture_copyright, G_IM_FMT_RGBA, G_IM_SIZ_16b, 128, 16, 0, G_TX_CLAMP, G_TX_CLAMP, 7, 4, G_TX_NOLOD, G_TX_NOLOD),
     gsSPVertex(intro_seg7_vertex_copyright, 4, 0),
-    gsSP2Triangles( 0,  1,  2, 0x0,  0,  2,  3, 0x0),
-
-    gsDPLoadTextureBlock(intro_seg7_texture_tm, G_IM_FMT_RGBA, G_IM_SIZ_16b, 16, 16, 0, G_TX_CLAMP, G_TX_CLAMP, 4, 4, G_TX_NOLOD, G_TX_NOLOD),
-    gsSPVertex(intro_seg7_vertex_tm, 4, 0),
     gsSP2Triangles( 0,  1,  2, 0x0,  0,  2,  3, 0x0),
 
     gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF),
@@ -8768,3 +8759,4 @@ const f32 intro_seg7_table_0700C880[] = {
     0.048600f, 0.048600f, 0.012800f, 0.012800f,
     0.012800f, 0.000000f, 0.000000f, 0.000000f,
 };
+#include "levels/intro/ninten/model.inc.c"

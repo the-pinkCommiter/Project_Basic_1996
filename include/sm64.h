@@ -50,6 +50,17 @@
 #define LAYER_TRANSPARENT_DECAL 6
 #define LAYER_TRANSPARENT_INTER 7
 
+// RMs
+#define	RM_BACK				0
+#define	RM_SURF				1
+#define	RM_DECAL			2
+#define	RM_INTER			3
+#define	RM_SPRITE			4
+#define	RM_XSURF			5
+#define	RM_XDECAL			6
+#define	RM_XINTER			7
+#define	RM_SOFT_SPRITE		RM_SPRITE
+
 #define INPUT_NONZERO_ANALOG         0x0001
 #define INPUT_A_PRESSED              0x0002
 #define INPUT_OFF_FLOOR              0x0004

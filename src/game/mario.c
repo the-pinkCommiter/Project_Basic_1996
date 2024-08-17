@@ -1622,13 +1622,6 @@ void mario_update_hitbox_and_cap_model(struct MarioState *m) {
         bodyState->modelState |= MODEL_STATE_METAL;
     }
 
-    //! (Pause buffered hitstun) Since the global timer increments while paused,
-    //  this can be paused through to give continual invisibility. This leads to
-    //  no interaction with objects.
-    if ((m->invincTimer >= 3) && (gGlobalTimer & 1)) {
-        gMarioState->marioObj->header.gfx.node.flags |= GRAPH_RENDER_INVISIBLE;
-    }
-
     if (flags & MARIO_CAP_IN_HAND) {
         if (flags & MARIO_WING_CAP) {
             bodyState->handState = MARIO_HAND_HOLDING_WING_CAP;
@@ -1794,8 +1787,6 @@ void init_mario(void) {
     gMarioState->actionTimer = 0;
     gMarioState->framesSinceA = 0xFF;
     gMarioState->framesSinceB = 0xFF;
-
-    gMarioState->invincTimer = 0;
 
     if (save_file_get_flags()
         & (SAVE_FLAG_CAP_ON_GROUND | SAVE_FLAG_CAP_ON_KLEPTO | SAVE_FLAG_CAP_ON_UKIKI

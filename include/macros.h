@@ -7,6 +7,9 @@
 #define GLOBAL_ASM(...)
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-braces"
+
 #if !defined(__sgi) && (!defined(NON_MATCHING) || !defined(AVOID_UB))
 // asm-process isn't supported outside of IDO, and undefined behavior causes
 // crashes.
@@ -23,12 +26,6 @@
 #define UNUSED __attribute__((unused))
 #else
 #define UNUSED
-#endif
-
-#ifdef VERSION_CN
-#define UNUSED_CN UNUSED
-#else
-#define UNUSED_CN
 #endif
 
 // Avoid undefined behaviour for non-returning functions
@@ -75,17 +72,28 @@
 #define VIRTUAL_TO_PHYSICAL2(addr)  ((void *)(addr))
 #endif
 
+// defined light and scale for ShapeColor()
+#define LIGHT_X 40
+#define LIGHT_Y 40
+#define LIGHT_Z 40
+// Scale
+#define	C_SCALE	4
+// ShapeColor()
+#define ShapeColor(R,G,B) {{R/C_SCALE ,G/C_SCALE ,B/C_SCALE ,0 ,R/C_SCALE ,G/C_SCALE ,B/C_SCALE ,0 },{ R,G,B,0, R,G,B,0, LIGHT_X, LIGHT_Y, LIGHT_Z, 0} }
+
+
+#define FORCE_BSS
+
+#ifdef VERSION_CN
+#define UNUSED_CN UNUSED
+#else
+#define UNUSED_CN
+#endif
 // Stubbed CN debug prints
 #ifdef VERSION_CN
 #define CN_DEBUG_PRINTF(args) osSyncPrintf args
 #else
 #define CN_DEBUG_PRINTF(args)
-#endif
-
-#ifdef VERSION_CN
-#define FORCE_BSS __attribute__((nocommon)) __attribute__((section (".bss_cn")))
-#else
-#define FORCE_BSS
 #endif
 
 #endif // MACROS_H

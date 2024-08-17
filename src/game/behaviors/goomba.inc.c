@@ -1,4 +1,5 @@
 
+
 /**
  * Behavior for bhvGoomba and bhvGoombaTripletSpawner,
  * Goombas can either be spawned individually, or spawned by a triplet spawner.
@@ -89,7 +90,8 @@ void bhv_goomba_triplet_spawner_update(void) {
                     s16 dz = 500.0f * sins(angle);
 
                     spawn_object_relative((o->oBhvParams2ndByte & GOOMBA_BP_SIZE_MASK)
-                                           | (goombaFlag >> 6), dx, 0, dz, o, MODEL_GOOMBA, bhvGoomba);
+                                              | (goombaFlag >> 6),
+                                          dx, 0, dz, o, MODEL_GOOMBA, bhvGoomba);
                 }
             }
 
@@ -123,11 +125,7 @@ void bhv_goomba_init(void) {
  * Enter the jump action and set initial y velocity.
  */
 static void goomba_begin_jump(void) {
-    cur_obj_play_sound_2(SOUND_OBJ_GOOMBA_ALERT);
-
-    o->oAction = GOOMBA_ACT_JUMP;
-    o->oForwardVel = 0.0f;
-    o->oVelY = 50.0f / 3.0f * o->oGoombaScale;
+    o->oAction = GOOMBA_ACT_WALK;
 }
 
 /**
@@ -137,8 +135,8 @@ static void goomba_begin_jump(void) {
  */
 static void mark_goomba_as_dead(void) {
     if (o->parentObj != o) {
-        set_object_respawn_info_bits(
-            o->parentObj, (o->oBhvParams2ndByte & GOOMBA_BP_TRIPLET_RESPAWN_FLAG_MASK) >> 2);
+        set_object_respawn_info_bits(o->parentObj,
+                                     (o->oBhvParams2ndByte & GOOMBA_BP_TRIPLET_RESPAWN_FLAG_MASK) >> 2);
 
         o->parentObj->oBhvParams =
             o->parentObj->oBhvParams | (o->oBhvParams2ndByte & GOOMBA_BP_TRIPLET_RESPAWN_FLAG_MASK) << 6;
@@ -155,9 +153,7 @@ static void goomba_act_walk(void) {
     obj_forward_vel_approach(o->oGoombaRelativeSpeed * o->oGoombaScale, 0.4f);
 
     // If walking fast enough, play footstep sounds
-    if (o->oGoombaRelativeSpeed > 4.0f / 3.0f) {
-        cur_obj_play_sound_at_anim_range(2, 17, SOUND_OBJ_GOOMBA_WALK);
-    }
+    cur_obj_play_sound_at_anim_range(2, 17, SOUND_OBJ_GOOMBA_WALK);
 
     //! By strategically hitting a wall, steep slope, or another goomba, we can
     //  prevent the goomba from turning back toward home for a while (goomba
@@ -178,15 +174,9 @@ static void goomba_act_walk(void) {
         if (!(o->oGoombaTurningAwayFromWall =
                   obj_bounce_off_walls_edges_objects(&o->oGoombaTargetYaw))) {
             if (o->oDistanceToMario < 500.0f) {
-                // If close to mario, begin chasing him. If not already chasing
-                // him, jump first
-
-                if (o->oGoombaRelativeSpeed <= 2.0f) {
-                    goomba_begin_jump();
-                }
+                // If close to mario, begin chasing him.
 
                 o->oGoombaTargetYaw = o->oAngleToMario;
-                o->oGoombaRelativeSpeed = 20.0f;
             } else {
                 // If mario is far away, walk at a normal pace, turning randomly
                 // and occasionally jumping
@@ -200,7 +190,6 @@ static void goomba_act_walk(void) {
                         o->oGoombaTargetYaw = obj_random_fixed_turn(0x2000);
                         o->oGoombaWalkTimer = random_linear_offset(100, 100);
                     } else {
-                        goomba_begin_jump();
                         o->oGoombaTargetYaw = obj_random_fixed_turn(0x6000);
                     }
                 }
@@ -242,11 +231,7 @@ static void goomba_act_jump(void) {
     //  still on the ground.
     //  This puts the goomba back in the walk action, but the positive velY will
     //  make it hop into the air. We can then trigger another jump.
-    if (o->oMoveFlags & OBJ_MOVE_MASK_ON_GROUND) {
-        o->oAction = GOOMBA_ACT_WALK;
-    } else {
-        cur_obj_rotate_yaw_toward(o->oGoombaTargetYaw, 0x800);
-    }
+    o->oAction = GOOMBA_ACT_WALK;
 }
 
 /**

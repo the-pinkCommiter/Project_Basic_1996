@@ -25,5 +25,6 @@ extern const LevelScript script_intro_L2[];
 extern const LevelScript script_intro_L3[];
 extern const LevelScript script_intro_L4[];
 extern const LevelScript script_intro_L5[];
+#include "levels/intro/ninten/header.h"
 
 #endif

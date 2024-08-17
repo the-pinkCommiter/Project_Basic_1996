@@ -82,7 +82,7 @@ Gfx *geo_intro_super_mario_64_logo(s32 state, struct GraphNode *node, UNUSED voi
         guScale(scaleMat, scaleX, scaleY, scaleZ);
 
         gSPMatrix(dlIter++, scaleMat, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-        gSPDisplayList(dlIter++, &intro_seg7_dl_logo);  // draw model
+	gSPDisplayList(dlIter++, &gfx_mario64_logo_gfx64); // draw model
         gSPPopMatrix(dlIter++, G_MTX_MODELVIEW);
         gSPEndDisplayList(dlIter);
 
@@ -99,9 +99,9 @@ Gfx *geo_intro_tm_copyright(s32 state, struct GraphNode *node, UNUSED void *cont
     Gfx *dl = NULL;
     Gfx *dlIter = NULL;
 
-    if (state != 1) {  // reset
+    if (state != 1) { // reset
         sTmCopyrightAlpha = 0;
-    } else if (state == 1) {  // draw
+    } else if (state == 1) { // draw
         dl = alloc_display_list(5 * sizeof(*dl));
         dlIter = dl;
         gSPDisplayList(dlIter++, dl_proj_mtx_fullscreen);
@@ -116,10 +116,11 @@ Gfx *geo_intro_tm_copyright(s32 state, struct GraphNode *node, UNUSED void *cont
                 gDPSetRenderMode(dlIter++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
                 break;
         }
-        gSPDisplayList(dlIter++, &intro_seg7_dl_copyright);  // draw model
+        gSPDisplayList(dlIter++, &intro_seg7_dl_copyright); // draw model
         gSPEndDisplayList(dlIter);
 
-        // Once the "Super Mario 64" logo has just about zoomed fully, fade in the "TM" and copyright text
+        // Once the "Super Mario 64" logo has just about zoomed fully, fade in the "TM" and copyright
+        // text
         if (sIntroFrameCounter >= 19) {
             sTmCopyrightAlpha += 26;
             if (sTmCopyrightAlpha > 255) {

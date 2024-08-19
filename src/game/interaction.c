@@ -44,7 +44,6 @@
 #define INT_ATTACK_NOT_WEAK_FROM_ABOVE                                                \
     (INT_GROUND_POUND_OR_TWIRL | INT_PUNCH | INT_KICK | INT_TRIP | INT_HIT_FROM_BELOW)
 
-u8 sDelayInvincTimer;
 s16 sInvulnerable;
 u32 interact_coin(struct MarioState *, u32, struct Object *);
 u32 interact_water_ring(struct MarioState *, u32, struct Object *);
@@ -1203,9 +1202,6 @@ u32 interact_snufit_bullet(struct MarioState *m, UNUSED u32 interactType, struct
         }
     }
 
-    if (!(o->oInteractionSubtype & INT_SUBTYPE_DELAY_INVINCIBILITY)) {
-        sDelayInvincTimer = TRUE;
-    }
 
     return FALSE;
 }
@@ -1217,10 +1213,6 @@ u32 interact_clam_or_bubba(struct MarioState *m, UNUSED u32 interactType, struct
         return set_mario_action(m, ACT_EATEN_BY_BUBBA, 0);
     } else if (take_damage_and_knock_back(m, o)) {
         return TRUE;
-    }
-
-    if (!(o->oInteractionSubtype & INT_SUBTYPE_DELAY_INVINCIBILITY)) {
-        sDelayInvincTimer = TRUE;
     }
 
     return TRUE;
@@ -1256,7 +1248,6 @@ u32 interact_bully(struct MarioState *m, UNUSED u32 interactType, struct Object 
     else if (!sInvulnerable && !(m->flags & MARIO_VANISH_CAP)
              && !(o->oInteractionSubtype & INT_SUBTYPE_DELAY_INVINCIBILITY)) {
         o->oInteractStatus = INT_STATUS_INTERACTED;
-        m->invincTimer = 2;
 
         update_mario_sound_and_camera(m);
         play_sound(SOUND_MARIO_EEUH, m->marioObj->header.gfx.cameraToObject);
@@ -1295,17 +1286,7 @@ u32 interact_shock(struct MarioState *m, UNUSED u32 interactType, struct Object 
         }
     }
 
-    if (!(o->oInteractionSubtype & INT_SUBTYPE_DELAY_INVINCIBILITY)) {
-        sDelayInvincTimer = TRUE;
-    }
 
-    return FALSE;
-}
-
-UNUSED static u32 interact_stub(UNUSED struct MarioState *m, UNUSED u32 interactType, struct Object *o) {
-    if (!(o->oInteractionSubtype & INT_SUBTYPE_DELAY_INVINCIBILITY)) {
-        sDelayInvincTimer = TRUE;
-    }
     return FALSE;
 }
 
@@ -1314,9 +1295,6 @@ u32 interact_mr_blizzard(struct MarioState *m, UNUSED u32 interactType, struct O
         return TRUE;
     }
 
-    if (!(o->oInteractionSubtype & INT_SUBTYPE_DELAY_INVINCIBILITY)) {
-        sDelayInvincTimer = TRUE;
-    }
 
     return FALSE;
 }
@@ -1358,9 +1336,6 @@ u32 interact_hit_from_below(struct MarioState *m, UNUSED u32 interactType, struc
         return TRUE;
     }
 
-    if (!(o->oInteractionSubtype & INT_SUBTYPE_DELAY_INVINCIBILITY)) {
-        sDelayInvincTimer = TRUE;
-    }
 
     return FALSE;
 }
@@ -1396,9 +1371,6 @@ u32 interact_bounce_top(struct MarioState *m, UNUSED u32 interactType, struct Ob
         return TRUE;
     }
 
-    if (!(o->oInteractionSubtype & INT_SUBTYPE_DELAY_INVINCIBILITY)) {
-        sDelayInvincTimer = TRUE;
-    }
 
     return FALSE;
 }
@@ -1413,9 +1385,6 @@ u32 interact_unknown_08(struct MarioState *m, UNUSED u32 interactType, struct Ob
         return TRUE;
     }
 
-    if (!(o->oInteractionSubtype & INT_SUBTYPE_DELAY_INVINCIBILITY)) {
-        sDelayInvincTimer = TRUE;
-    }
 
     return FALSE;
 }
@@ -1423,10 +1392,6 @@ u32 interact_unknown_08(struct MarioState *m, UNUSED u32 interactType, struct Ob
 u32 interact_damage(struct MarioState *m, UNUSED u32 interactType, struct Object *o) {
     if (take_damage_and_knock_back(m, o)) {
         return TRUE;
-    }
-
-    if (!(o->oInteractionSubtype & INT_SUBTYPE_DELAY_INVINCIBILITY)) {
-        sDelayInvincTimer = TRUE;
     }
 
     return FALSE;
@@ -1778,8 +1743,7 @@ void check_kick_or_punch_wall(struct MarioState *m) {
 }
 
 void mario_process_interactions(struct MarioState *m) {
-    sDelayInvincTimer = FALSE;
-    sInvulnerable = (m->action & ACT_FLAG_INVULNERABLE) || m->invincTimer != 0;
+    sInvulnerable = (m->action & ACT_FLAG_INVULNERABLE);
 
     if (!(m->action & ACT_FLAG_INTANGIBLE) && m->collidedObjInteractTypes != 0) {
         s32 i;
@@ -1797,10 +1761,6 @@ void mario_process_interactions(struct MarioState *m) {
                 }
             }
         }
-    }
-
-    if (m->invincTimer > 0 && !sDelayInvincTimer) {
-        m->invincTimer--;
     }
 
     //! If the kick/punch flags are set and an object collision changes Mario's
